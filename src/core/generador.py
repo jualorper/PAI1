@@ -7,10 +7,10 @@ def generador_archivos(num_replicas, num_files):
             os.mkdir("../replicas")
 
     letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    next = [""]
     num_letters = len(letters)
     
     for i in range(num_replicas):  
+        next = [""]
         directorio = "replica" + str(i)
         
         if not os.path.exists("../replicas/" + directorio):

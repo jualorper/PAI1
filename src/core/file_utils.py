@@ -4,6 +4,8 @@ import os
 import shutil
 from functools import reduce
 
+from flask.json import jsonify
+
 
 class FileUtils():
     """
@@ -15,22 +17,53 @@ class FileUtils():
     hashes = {}
     json_filename = os.path.join(path, "files.json")
 
-    def get_hashes(self):
+    def __init__(self):
+        if not bool(self.hashes) and os.path.exists(self.json_filename):
+            with open(self.json_filename) as json_data:
+                self.hashes = json.load(json_data)
+
+    def get_hash(self, filename):
         """
         Read json with filenames and hashes
 
-        Arguments:
-            path {str} -- Path of json file
+        Returns:
+            dict -- files and hashes
+        """
+        msg = ""
+        if bool(self.hashes):
+            replicas = self.hashes["replicas"]
+        else:
+            result = {"message": "HIDS failure. Please populate files."}, 500
+
+        try:
+            for replica in replicas:
+                if filename in replicas[replica]:
+                    result = {
+                        replica: {filename: replicas[replica][filename]}
+                    }, 200
+                    msg = ""
+                    break
+                else:
+                    msg += f"'{filename}' not exist in '{replica}'; "
+        except Exception as e:
+            if not result:
+                result = {"message": e.strerror}, 400
+        if msg != "":
+            result = {"message": msg}, 400
+        return result
+
+    def get_hashes(self):
+        """
+        Read json with filenames and hashes
 
         Returns:
             dict -- files and hashes
         """
         if bool(self.hashes):
-            result = self.hashes
+            result = self.hashes, 200
         else:
-            with open(self.json_filename) as json_data:
-                result = json.load(json_data)
-            self.hashes = result
+            result = {"message": "HIDS failure. Please populate files."}, 500
+
         return result
 
     def files_hashes_to_dict(self, path):
@@ -127,4 +160,4 @@ class FileUtils():
 
                     file.write("".join(next))
 
-        return self.files_hashes_to_dict(self.replicas_path)
+        return self.files_hashes_to_dict(self.replicas_path), 201

@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import shutil
+import hmac
 from functools import reduce
 
 from flask.json import jsonify
@@ -51,6 +52,41 @@ class FileUtils():
         if msg != "":
             result = {"message": msg}, 400
         return result
+
+    def check_file(self, filename, hash, token):
+        """
+        return:
+            MAC
+            or
+            Integrity error
+        """
+        msg = ""
+        replicas = self.get_hash(filename)
+        if replicas[1] == 200:
+            replicas = replicas[0]
+            for replica in replicas:
+                dict_hash = replica[filename]
+                if hash == dict_hash:
+                    result = self.mac(filename, dict_hash,token), 200
+                    msg = ""
+                    break
+                else:
+                    msg += f"Integrity error in {filename} for {replica}"
+        else:
+            result = replicas
+
+        if msg=="":
+            result = {"message": msg}, 400
+        
+        return result
+
+    def mac(self, file_name, file_hash, token):
+
+        mensaje = b'{}{}'.format(file_name, file_hash)
+        clave = b'{}'.format(token)
+        mac = hmac.new(mensaje, clave, hashlib.sha256)
+        return mac.digest()      
+
 
     def get_hashes(self):
         """

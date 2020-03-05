@@ -50,6 +50,23 @@ model_populate = api.model(
         ),
     })
 
+model_mac = api.model(
+    'Generate mac', {
+        'token': fields.String(
+            required=True,
+            description="User token"
+        ),
+        'filename': fields.String(
+            required=True,
+            description="Name of file"
+        ),
+        'hash': fields.String(
+            required=True,
+            description="Hash of file"
+        ),
+    }
+)
+
 
 fileUtils = FileUtils()
 
@@ -89,3 +106,14 @@ class Populate(Resource):
             request.json["replicas"],
             request.json["files"]
         )
+
+@api.route("/mac")
+class Initialize(Resource):
+    @api.doc(description="Generate mac")
+    @api.expect(model_mac)
+    def get(self):
+        return fileUtils.check_file(
+            request.json["filename"], 
+            request.json["hash"], 
+            request.json["token"]
+            )

@@ -18,7 +18,6 @@ class FileUtils():
     replicas_path = ""
     hashes = {}
     json_filename = os.path.join(path, "files.json")
-    
 
     def __init__(self):
         if not bool(self.hashes) and os.path.exists(self.json_filename):

@@ -2,9 +2,9 @@
 from flask import jsonify, request
 from flask_restplus import Namespace, Resource, fields
 
-from core import file_utils as FileUtils
+from core.file_utils import FileUtils
 
-api = Namespace('files', description='HIDS files generate')
+api = Namespace('file', description='HIDS files generate')
 
 model = api.model(
     'Request',
@@ -52,33 +52,44 @@ model_populate = api.model(
 
 file_utils = FileUtils()
 
+fileUtils = FileUtils()
+
+
 @api.route("/")
 class Files(Resource):
-    @api.doc(description="Check file")
-    @api.response(200, "File checked")
-    @api.response(400, "Verification fail")
-    @api.expect(model_populate)
+    @api.doc(description="Get all files and hashes",
+             responses={
+                 200: "Files and hashes",
+                 500: "HIDS failure. Please populate files"
+             })
     def get(self):
-        # if bool(json_files):
-        #     json_files = FileUtils.
-        return "{hola: mundo}"
+        return fileUtils.get_hashes()
+
+
+@api.route("/<string:filename>")
+class File(Resource):
+    @api.doc(description="Get one filename and hash",
+             responses={
+                 200: "Filename and hash",
+                 400: "Filename and hash not found"
+             })
+    def get(self, filename):
+        return fileUtils.get_hash(filename)
 
 
 @api.route("/populate")
 class Populate(Resource):
-    @api.doc(description="Check file")
-    @api.response(200, "File checked")
-    @api.response(400, "Verification fail")
+    @api.doc(description="Populate dummies files",
+             responses={
+                 201: "Files and replicas created",
+                 400: "Error creating files or replicas"
+             })
     @api.expect(model_populate)
     def post(self):
-        num_replicas = request.json["replicas"]
-        num_files = request.json["files"]
-        json_files = FileUtils.file_generator(
-            self.api.app.root_path,
-            num_replicas,
-            num_files
+        return fileUtils.file_generator(
+            request.json["replicas"],
+            request.json["files"]
         )
-        return json_files
 
 @api.route("/initialize")
 class Initialize(Resource):

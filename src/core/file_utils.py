@@ -4,10 +4,8 @@ import os
 import shutil
 import hmac
 from functools import reduce
-from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
 
-from flask.json import jsonify
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 class FileUtils():
@@ -16,7 +14,7 @@ class FileUtils():
     """
 
     path = os.path.join(os.path.dirname(__file__), "..")
-    replicas_path = ""
+    replicas_path = os.path.join(path, "replicas")
     hashes = {}
     json_filename = os.path.join(path, "files.json")
 
@@ -24,6 +22,7 @@ class FileUtils():
         if not bool(self.hashes) and os.path.exists(self.json_filename):
             with open(self.json_filename) as json_data:
                 self.hashes = json.load(json_data)
+        self.start_scheduler()
 
     def get_hash(self, filename):
         """
@@ -33,6 +32,7 @@ class FileUtils():
             dict -- files and hashes
         """
         msg = ""
+        d_hashes = {}
         if bool(self.hashes):
             replicas = self.hashes["replicas"]
         else:
@@ -40,14 +40,15 @@ class FileUtils():
 
         try:
             for replica in replicas:
-                if filename in replicas[replica]:
-                    result = {
+                try:
+                    dict_hashes = {
                         replica: {filename: replicas[replica][filename]}
-                    }, 200
+                    }
                     msg = ""
-                    break
-                else:
+                except Exception:
                     msg += f"'{filename}' not exist in '{replica}'; "
+                d_hashes.update(dict_hashes)
+            result = d_hashes, 200
         except Exception as e:
             if not result:
                 result = {"message": e.strerror}, 400
@@ -55,7 +56,7 @@ class FileUtils():
             result = {"message": msg}, 400
         return result
 
-    def check_file(self, filename, hash, token):
+    def check_file(self, filename, client_hash, token):
         """
         return:
             MAC
@@ -67,9 +68,9 @@ class FileUtils():
         if replicas[1] == 200:
             replicas = replicas[0]
             for replica in replicas:
-                dict_hash = replica[filename]
-                if hash == dict_hash:
-                    result = self.mac(filename, dict_hash,token), 200
+                dict_hash = replicas[replica][filename]
+                if client_hash == dict_hash:
+                    result = self.mac(filename, dict_hash, token), 200
                     msg = ""
                     break
                 else:
@@ -77,18 +78,16 @@ class FileUtils():
         else:
             result = replicas
 
-        if msg=="":
+        if msg != "":
             result = {"message": msg}, 400
-        
+
         return result
 
     def mac(self, file_name, file_hash, token):
 
-        mensaje = b'{}{}'.format(file_name, file_hash)
-        clave = b'{}'.format(token)
-        mac = hmac.new(mensaje, clave, hashlib.sha256)
-        return mac.digest()      
-
+        mensaje = file_name + file_hash
+        mac = hmac.new(mensaje.encode(), token.encode(), hashlib.sha256)
+        return str(mac.digest())
 
     def get_hashes(self):
         """
@@ -131,7 +130,7 @@ class FileUtils():
         self.hashes = dir
         return dir
 
-    def _file_to_hash(self, file):
+    def __file_to_hash(self, file):
         """
         Calculate file hash
 
@@ -161,7 +160,6 @@ class FileUtils():
         Returns:
             dict -- Dict with files and hashes
         """
-        self.replicas_path = os.path.join(self.path, "replicas")
         # Delete all files
         if os.path.exists(self.replicas_path):
             shutil.rmtree(self.replicas_path)
@@ -202,23 +200,32 @@ class FileUtils():
 
     def daily_analysis(self):
         fecha_actual = datetime.now()
-        file_logs = "logs-" + str(fecha_actual.month) + "-" + str(fecha_actual.year) + ".log"
+        file_logs = "logs-" + str(fecha_actual.month) + \
+            "-" + str(fecha_actual.year) + ".log"
         file_logs_path = os.path.join(self.path, file_logs)
         with open(file_logs_path, "a+", encoding="utf-8") as f:
-            f.write("================== Analysis of " + fecha_actual.now().strftime("%d/%m/%Y") + " ==================\n")
+            f.write(
+                "================== Analysis of " +
+                fecha_actual.now().strftime("%d/%m/%Y")
+                + " ==================\n"
+            )
             for replica in self.hashes["replicas"].keys():
-                dict_hashes_replica = self.hashes[replica]
+                dict_hashes_replica = self.hashes["replicas"][replica]
                 for file_name in dict_hashes_replica.keys():
                     hash_dict = dict_hashes_replica[file_name]
-                    hash_of_file_in_replica = self._file_to_hash(os.path.join(replica, file_name))
+                    hash_of_file_in_replica = self._file_to_hash(
+                        os.path.join(self.replicas_path, replica, file_name))
                     if hash_dict != hash_of_file_in_replica:
-                        f.write("INTEGRITY ERROR (" + fecha_actual.now().strftime("%H:%M:%S %d/%m/%Y") + "): '" + file_name + "' (" + replica +")\n")
-            f.write("\n")        
+                        f.write(
+                            "INTEGRITY ERROR (" +
+                            fecha_actual.now().strftime("%H:%M:%S %d/%m/%Y") +
+                            "): '" + file_name + "' (" + replica + ")\n"
+                        )
+            f.write("\n")
 
     def export_dict_json(self):
         with open(self.json_filename, 'w') as json_file:
             json.dump(self.hashes, json_file)
-
 
     def start_scheduler(self):
         scheduler = BackgroundScheduler()

@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import shutil
+import hmac
 from functools import reduce
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -54,6 +55,39 @@ class FileUtils():
         if msg != "":
             result = {"message": msg}, 400
         return result
+    
+    def check_file(self, filename, client_hash, token):
+        """
+        return:
+            MAC
+            or
+            Integrity error
+        """
+        msg = ""
+        replicas = self.get_hash(filename)
+        if replicas[1] == 200:
+            replicas = replicas[0]
+            for replica in replicas:
+                dict_hash = replicas[replica][filename]
+                if client_hash == dict_hash:
+                    result = self.__mac(filename, dict_hash, token), 200
+                    msg = ""
+                    break
+                else:
+                    msg += f"Integrity error in {filename} for {replica}"
+        else:
+            result = replicas
+
+        if msg != "":
+            result = {"message": msg}, 400
+
+        return result
+
+    def __mac(self, file_name, file_hash, token):
+
+        mensaje = file_name + file_hash
+        mac = hmac.new(mensaje.encode(), token.encode(), hashlib.sha256)
+        return str(mac.hexdigest())
 
     def get_hashes(self):
         """

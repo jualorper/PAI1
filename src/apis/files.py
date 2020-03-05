@@ -1,5 +1,4 @@
-
-from flask import jsonify, request
+from flask import request
 from flask_restplus import Namespace, Resource, fields
 
 from core.file_utils import FileUtils
@@ -92,17 +91,6 @@ class File(Resource):
         return file_utils.get_hash(filename)
 
 
-@api.route("/<string:filename>")
-class File(Resource):
-    @api.doc(description="Get one filename and hash",
-             responses={
-                 200: "Filename and hash",
-                 400: "Filename and hash not found"
-             })
-    def get(self, filename):
-        return file_utils.get_hash(filename)
-
-
 @api.route("/populate")
 class Populate(Resource):
     @api.doc(description="Populate dummies files",
@@ -127,8 +115,8 @@ class Initialize(Resource):
         return file_utils.start_analysis()
 
 
-@api.route("/mac")
-class Initialize(Resource):
+@api.route("/generate-mac")
+class GenerateMac(Resource):
     @api.doc(description="Generate mac")
     @api.expect(model_mac)
     def post(self):

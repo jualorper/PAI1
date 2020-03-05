@@ -1,10 +1,11 @@
 import hashlib
+import hmac
 import json
 import os
 import shutil
-import hmac
-from functools import reduce
 from datetime import datetime
+from functools import reduce
+
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
@@ -55,7 +56,7 @@ class FileUtils():
         if msg != "":
             result = {"message": msg}, 400
         return result
-    
+
     def check_file(self, filename, client_hash, token):
         """
         return:
@@ -175,7 +176,9 @@ class FileUtils():
             next = [""]
             directorio = "replica" + str(i)
 
-            if not os.path.exists(os.path.join(self.replicas_path, directorio)):
+            if not os.path.exists(
+                os.path.join(self.replicas_path, directorio)
+            ):
                 os.mkdir(os.path.join(self.replicas_path, directorio))
 
             for i in range(num_files):
@@ -209,11 +212,14 @@ class FileUtils():
                     fecha_actual.now().strftime("%d/%m/%Y") +
                     " ==================\n")
             for replica in self.hashes["replicas"].keys():
-                dict_hashes_replica = self.hashes[replica]
+                dict_hashes_replica = self.hashes["replicas"][replica]
                 for file_name in dict_hashes_replica.keys():
                     hash_dict = dict_hashes_replica[file_name]
-                    hash_of_file_in_replica = self._file_to_hash(
-                        os.path.join(replica, file_name))
+                    file_path = os.path.join(
+                        self.replicas_path, replica, file_name
+                    )
+                    if os.path.exists(file_path):
+                        hash_of_file_in_replica = self._file_to_hash(file_path)
                     if hash_dict != hash_of_file_in_replica:
                         f.write(
                             "INTEGRITY ERROR (" +

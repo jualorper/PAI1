@@ -50,8 +50,8 @@ model_populate = api.model(
         ),
     })
 
+file_utils = FileUtils()
 
-fileUtils = FileUtils()
 
 
 @api.route("/")
@@ -62,7 +62,18 @@ class Files(Resource):
                  500: "HIDS failure. Please populate files"
              })
     def get(self):
-        return fileUtils.get_hashes()
+        return file_utils.get_hashes()
+
+
+@api.route("/<string:filename>")
+class File(Resource):
+    @api.doc(description="Get one filename and hash",
+             responses={
+                 200: "Filename and hash",
+                 400: "Filename and hash not found"
+             })
+    def get(self, filename):
+        return file_utils.get_hash(filename)
 
 
 @api.route("/<string:filename>")
@@ -88,4 +99,23 @@ class Populate(Resource):
         return fileUtils.file_generator(
             request.json["replicas"],
             request.json["files"]
+        )
+
+@api.route("/initialize")
+class Initialize(Resource):
+    @api.doc(description="Starts daily analysis scheduler")
+    @api.response(200, "Analysis started successfully")
+    @api.response(400, "Failed process")
+    def get(self):
+        return file_utils.start_analysis()
+
+@api.route("/mac")
+class Initialize(Resource):
+    @api.doc(description="Generate mac")
+    @api.expect(model_mac)
+    def post(self):
+        return file_utils.check_file(
+            request.json["filename"],
+            request.json["hash"],
+            request.json["token"]
         )

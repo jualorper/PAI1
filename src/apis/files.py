@@ -50,8 +50,24 @@ model_populate = api.model(
         ),
     })
 
-file_utils = FileUtils()
+model_mac = api.model(
+    'Generate mac', {
+        'token': fields.String(
+            required=True,
+            description="User token"
+        ),
+        'filename': fields.String(
+            required=True,
+            description="Name of file"
+        ),
+        'hash': fields.String(
+            required=True,
+            description="Hash of file"
+        ),
+    }
+)
 
+file_utils = FileUtils()
 
 
 @api.route("/")
@@ -84,7 +100,7 @@ class File(Resource):
                  400: "Filename and hash not found"
              })
     def get(self, filename):
-        return fileUtils.get_hash(filename)
+        return file_utils.get_hash(filename)
 
 
 @api.route("/populate")
@@ -96,10 +112,11 @@ class Populate(Resource):
              })
     @api.expect(model_populate)
     def post(self):
-        return fileUtils.file_generator(
+        return file_utils.file_generator(
             request.json["replicas"],
             request.json["files"]
         )
+
 
 @api.route("/initialize")
 class Initialize(Resource):
@@ -108,6 +125,7 @@ class Initialize(Resource):
     @api.response(400, "Failed process")
     def get(self):
         return file_utils.start_analysis()
+
 
 @api.route("/mac")
 class Initialize(Resource):

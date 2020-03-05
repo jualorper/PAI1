@@ -111,7 +111,7 @@ class Populate(Resource):
 class Initialize(Resource):
     @api.doc(description="Generate mac")
     @api.expect(model_mac)
-    def get(self):
+    def post(self):
         return fileUtils.check_file(
             request.json["filename"], 
             request.json["hash"], 

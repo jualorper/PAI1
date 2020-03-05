@@ -76,6 +76,17 @@ class File(Resource):
         return file_utils.get_hash(filename)
 
 
+@api.route("/<string:filename>")
+class File(Resource):
+    @api.doc(description="Get one filename and hash",
+             responses={
+                 200: "Filename and hash",
+                 400: "Filename and hash not found"
+             })
+    def get(self, filename):
+        return fileUtils.get_hash(filename)
+
+
 @api.route("/populate")
 class Populate(Resource):
     @api.doc(description="Populate dummies files",
@@ -85,7 +96,7 @@ class Populate(Resource):
              })
     @api.expect(model_populate)
     def post(self):
-        return file_utils.file_generator(
+        return fileUtils.file_generator(
             request.json["replicas"],
             request.json["files"]
         )
@@ -97,3 +108,14 @@ class Initialize(Resource):
     @api.response(400, "Failed process")
     def get(self):
         return file_utils.start_analysis()
+
+@api.route("/mac")
+class Initialize(Resource):
+    @api.doc(description="Generate mac")
+    @api.expect(model_mac)
+    def post(self):
+        return file_utils.check_file(
+            request.json["filename"],
+            request.json["hash"],
+            request.json["token"]
+        )

@@ -8,6 +8,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from flask.json import jsonify
 
+from flask.json import jsonify
+
 
 class FileUtils():
     """

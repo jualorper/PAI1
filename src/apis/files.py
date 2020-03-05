@@ -50,8 +50,8 @@ model_populate = api.model(
         ),
     })
 
+file_utils = FileUtils()
 
-fileUtils = FileUtils()
 
 
 @api.route("/")
@@ -62,7 +62,7 @@ class Files(Resource):
                  500: "HIDS failure. Please populate files"
              })
     def get(self):
-        return fileUtils.get_hashes()
+        return file_utils.get_hashes()
 
 
 @api.route("/<string:filename>")
@@ -73,7 +73,7 @@ class File(Resource):
                  400: "Filename and hash not found"
              })
     def get(self, filename):
-        return fileUtils.get_hash(filename)
+        return file_utils.get_hash(filename)
 
 
 @api.route("/populate")
@@ -85,7 +85,15 @@ class Populate(Resource):
              })
     @api.expect(model_populate)
     def post(self):
-        return fileUtils.file_generator(
+        return file_utils.file_generator(
             request.json["replicas"],
             request.json["files"]
         )
+
+@api.route("/initialize")
+class Initialize(Resource):
+    @api.doc(description="Starts daily analysis scheduler")
+    @api.response(200, "Analysis started successfully")
+    @api.response(400, "Failed process")
+    def get(self):
+        return file_utils.start_analysis()

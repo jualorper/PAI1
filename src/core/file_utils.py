@@ -193,3 +193,4 @@ class FileUtils():
         scheduler.add_job(self.export_dict_json, "interval", hours=1)
 
         scheduler.start()
+        return {"message": "Daily Analysis started successfully"}, 200

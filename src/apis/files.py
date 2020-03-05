@@ -50,6 +50,7 @@ model_populate = api.model(
         ),
     })
 
+file_utils = FileUtils()
 
 @api.route("/")
 class Files(Resource):
@@ -78,3 +79,11 @@ class Populate(Resource):
             num_files
         )
         return json_files
+
+@api.route("/initialize")
+class Initialize(Resource):
+    @api.doc(description="Starts daily analysis scheduler")
+    @api.response(200, "Analysis started successfully")
+    @api.response(400, "Failed process")
+    def get(self):
+        return file_utils.start_analysis()

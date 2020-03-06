@@ -1,0 +1,693 @@
+{
+	"info": {
+		"_postman_id": "e420de52-6208-4ad5-b0df-0d81d9b9aae5",
+		"name": "PAI1",
+		"description": "Proof of Possession",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Populate",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "token1",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"replicas\": 3,\n    \"files\": 1000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/file/populate",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"file",
+						"populate"
+					]
+				},
+				"description": "Generate files structure"
+			},
+			"response": [
+				{
+					"name": "Integrity error in all replicas",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Not Authorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Generated mac successfully",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "[Test 1:KO] Generate mac",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "token2"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"archivo33361.txt\",\n    \"hash\": \"93b1ef734d1c2627b27ce5788d6dda29d24597c79173a5125e68c1c51bf25f82\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/file/generate-mac",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"file",
+						"generate-mac"
+					]
+				},
+				"description": "No existe el fichero por el que se está preguntando"
+			},
+			"response": [
+				{
+					"name": "Integrity error in all replicas",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Generated mac successfully",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Not Authorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "[Test 2:KO] Generate mac",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "token2"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"archivo33361.txt\",\n    \"hash\": \"93b1ef734d1c2627b27ce5788d6dda29d24597c79173a5125e68c1c51bf25f82\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/file/generate-mac",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"file",
+						"generate-mac"
+					]
+				},
+				"description": "El cliente envía mal el hash"
+			},
+			"response": [
+				{
+					"name": "Not Authorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Integrity error in all replicas",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Generated mac successfully",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "[Test 3:OK] Generate mac",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "token2"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"archivo3861.txt\",\n    \"hash\": \"3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/file/generate-mac",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"file",
+						"generate-mac"
+					]
+				},
+				"description": "Generate mac"
+			},
+			"response": [
+				{
+					"name": "Integrity error in all replicas",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Not Authorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Generated mac successfully",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "Get hash of server",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "token1",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"replicas\": 3,\n    \"files\": 1000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/file/populate",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"file",
+						"populate"
+					]
+				},
+				"description": "Get hash of all replicas of server"
+			},
+			"response": [
+				{
+					"name": "Not Authorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Integrity error in all replicas",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				},
+				{
+					"name": "Generated mac successfully",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"<string>\",\n    \"hash\": \"<string>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/file/generate-mac",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"file",
+								"generate-mac"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"id": "baseUrl",
+			"key": "baseUrl",
+			"value": "/",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

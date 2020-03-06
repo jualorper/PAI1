@@ -145,3 +145,4 @@ dmypy.json
 # Sensible data
 replicas
 files.json
+hashes.json

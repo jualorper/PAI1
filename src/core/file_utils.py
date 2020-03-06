@@ -17,12 +17,21 @@ class FileUtils():
     path = os.path.join(os.path.dirname(__file__), "..")
     replicas_path = os.path.join(path, "replicas")
     hashes = {}
-    json_filename = os.path.join(path, "files.json")
+    json_filename = os.path.join(path, "hashes.json")
 
     def __init__(self):
+        self.__clean_start()
+
+    def __clean_start(self):
+        """
+        Generate by default 3 replicas and 1000 files by replica.
+        If replicas folder exists only start scheduler.
+        """
         if not bool(self.hashes) and os.path.exists(self.json_filename):
             with open(self.json_filename) as json_data:
                 self.hashes = json.load(json_data)
+        if not os.path.exists(self.replicas_path):
+            self.file_generator(3, 1000)
         self.start_scheduler()
 
     def get_hash(self, filename):
@@ -34,6 +43,7 @@ class FileUtils():
         """
         msg = ""
         d_hashes = {}
+        result = ""
         if bool(self.hashes):
             replicas = self.hashes["replicas"]
         else:
@@ -50,9 +60,10 @@ class FileUtils():
                     msg += f"'{filename}' not exist in '{replica}'; "
                 d_hashes.update(dict_hashes)
             result = d_hashes, 200
-        except Exception as e:
-            if not result:
-                result = {"message": e.strerror}, 400
+        except Exception:
+            if result == "":
+                result = {"message": f"'{filename}' not exist."}, 400
+                msg = ""
         if msg != "":
             result = {"message": msg}, 400
         return result
@@ -71,11 +82,28 @@ class FileUtils():
             for replica in replicas:
                 dict_hash = replicas[replica][filename]
                 if client_hash == dict_hash:
-                    result = self.__mac(filename, dict_hash, token), 200
+                    # Check hash file
+                    if os.path.exists(os.path.join(
+                            self.replicas_path, replica, filename
+                    )):
+                        file_hash = self._file_to_hash(
+                            os.path.join(
+                                self.replicas_path, replica, filename)
+                        )
+                    else:
+                        msg += f"Internal integrity error in '{filename}' for '{replica}'; "
+                    if dict_hash != file_hash:
+                        msg += f"Internal integrity error in '{filename}' for '{replica}'; "
+                        continue
+                    result = self.__generate_mac(
+                        filename,
+                        dict_hash,
+                        token
+                    ), 200
                     msg = ""
                     break
                 else:
-                    msg += f"Integrity error in {filename} for {replica}"
+                    msg += f"Integrity error in '{filename}' for '{replica}'; "
         else:
             result = replicas
 
@@ -84,7 +112,7 @@ class FileUtils():
 
         return result
 
-    def __mac(self, file_name, file_hash, token):
+    def __generate_mac(self, file_name, file_hash, token):
 
         mensaje = file_name + file_hash
         mac = hmac.new(mensaje.encode(), token.encode(), hashlib.sha256)
@@ -202,7 +230,10 @@ class FileUtils():
 
         return self.files_hashes_to_dict(self.replicas_path), 201
 
-    def daily_analysis(self):
+    def __daily_analysis(self):
+        """
+        Generate log file for each file with no integrity.
+        """
         fecha_actual = datetime.now()
         file_logs = "logs-" + str(fecha_actual.month) + \
             "-" + str(fecha_actual.year) + ".log"
@@ -229,7 +260,10 @@ class FileUtils():
                         )
             f.write("\n")
 
-    def export_dict_json(self):
+    def __export_dict_json(self):
+        """
+        Generate hashes json file from dict.
+        """
         with open(self.json_filename, 'w') as json_file:
             json.dump(self.hashes, json_file)
 
@@ -237,8 +271,10 @@ class FileUtils():
         scheduler = BackgroundScheduler()
 
         # Para cambiar el intervalo, sustituir hours=24 por minutes= o seconds=
-        scheduler.add_job(self.daily_analysis, "interval", hours=24)
-        scheduler.add_job(self.export_dict_json, "interval", hours=1)
+        scheduler.add_job(self.__daily_analysis, "interval",
+                          seconds=int(os.environ["DAILY_ANALYSIS"]))
+        scheduler.add_job(self.__export_dict_json, "interval",
+                          seconds=int(os.environ["CHECK_INTEGRITY"]))
 
         scheduler.start()
         return {"message": "Daily Analysis started successfully"}, 200
